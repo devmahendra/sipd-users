@@ -11,11 +11,16 @@ const responseDefault = (responseType, data = null, req = null) => {
 
   const responseCode = `${response.HTTP_CODE}${serviceCode}${response.CODE}`;
 
-  return {
+  const result = {
     responseCode,
     responseMessage: response.MESSAGE,
-    responseData: data,
   };
+
+  if (data !== null && data !== undefined && data !== '') {
+    result.responseData = data;
+  }
+
+  return result;
 };
 
 module.exports = responseDefault;

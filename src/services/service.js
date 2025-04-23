@@ -3,21 +3,25 @@ const repository = require('../repositories/repository');
 
 const login = async (req) => {
     const { username, password } = req.body;
-    const users = await repository.getUserByUsername(username);
+    const user = await repository.getUserByUsername(username);
+    
+    if (!user || !await authService.comparePassword(password, user.password || '')) {
+        throw new Error('Invalid credentials');
+    }
 
-    if (users.length === 0) throw new Error('User not found');
+    const userDetail = await repository.getUserById(user.id); 
+    const tokens = authService.generateTokens(userDetail);
 
-    const user = users[0];
-    const isValidPassword = await authService.comparePassword(password, user.password);
-    if (!isValidPassword) throw new Error('Username or password is incorrect');
-
-    const { accessToken, refreshToken, expiresIn, refreshExpiresIn } = authService.generateTokens(user);
-    await repository.storeRefreshToken(user.id, refreshToken, refreshExpiresIn);
+    await repository.storeRefreshToken(user.id, tokens.refreshToken, tokens.refreshExpiresIn);
 
     return {
-        accessToken,
-        refreshToken,
-        expiresIn,
+        user: {
+            id: user.id,
+            username: user.username,
+            profile: userDetail.user_profile,
+            role: userDetail.user_role.name,
+            },
+        tokens,
     };
 };
 

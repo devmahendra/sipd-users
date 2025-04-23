@@ -1,26 +1,27 @@
-require('dotenv').config({ path: __dirname + '/../../.env' });
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
-const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7 days';
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
+const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN;
 
 const comparePassword = async (inputPassword, storedHash) => {
-  return bcrypt.compare(inputPassword, storedHash);
+  const normalizedHash = storedHash.replace(/^\$2y\$/, '$2b$');
+  return bcrypt.compare(inputPassword, normalizedHash);
 };
 
 const buildTokenPayload = (user) => {
+  const base = user[0]
     return {
-        sub: user.id, 
-        username: user.username,
-        role: user.user_role.name,
-        menus: user.user_menu.map(menu => ({
-        id: menu.menu_id,
-        c: menu.can_create,
-        r: menu.can_read,
-        u: menu.can_update,
-        d: menu.can_delete,
+        id: base.user_id, 
+        username: base.username,
+        role: base.role_name,
+        menus: user.filter(item => item.menu_id).map(item => ({
+            id: item.menu_id,
+            c: item.can_create,
+            r: item.can_read,
+            u: item.can_update,
+            d: item.can_delete,
         })),
     };
 };
@@ -35,7 +36,6 @@ const generateTokens = (user) => {
     accessToken,
     refreshToken,
     expiresIn: JWT_EXPIRES_IN,
-    refreshExpiresIn: JWT_REFRESH_EXPIRES_IN,
   };
 };
 

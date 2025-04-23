@@ -14,7 +14,6 @@ const responseDefault = (responseType, data = null, req = null) => {
   return {
     responseCode,
     responseMessage: response.MESSAGE,
-    responseStatus: response.STATUS,
     responseData: data,
   };
 };

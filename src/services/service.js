@@ -1,26 +1,20 @@
 const authService = require('./authService');
 const repository = require('../repositories/repository');
 
+const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN;
+
 const login = async (req) => {
     const { username, password } = req.body;
     const user = await repository.getUserByUsername(username);
-    
     if (!user || !await authService.comparePassword(password, user.password || '')) {
         throw new Error('Invalid credentials');
     }
 
     const userDetail = await repository.getUserById(user.id); 
     const tokens = authService.generateTokens(userDetail);
-
-    await repository.storeRefreshToken(user.id, tokens.refreshToken, tokens.refreshExpiresIn);
+    await repository.storeRefreshToken(user.id, tokens.refreshToken, JWT_REFRESH_EXPIRES_IN);
 
     return {
-        user: {
-            id: user.id,
-            username: user.username,
-            profile: userDetail.user_profile,
-            role: userDetail.user_role.name,
-            },
         tokens,
     };
 };

@@ -8,7 +8,7 @@ const getUserByUsername = async (username) => {
         FROM users
         WHERE username = $1
     `, [username]);
-    return result.rows;
+    return result.rows[0];
   } finally {
     client.release();
   }
@@ -55,7 +55,7 @@ const storeRefreshToken = async (userId, token, refreshExpiresIn) => {
   try {
     await client.query(`
         INSERT INTO refresh_tokens (user_id, token, expires_at)
-        VALUES ($1, $2, NOW() + INTERVAL '$3')
+        VALUES ($1, $2, NOW() + $3::interval)
     `, [userId, token, refreshExpiresIn]);
   } finally {
     client.release();

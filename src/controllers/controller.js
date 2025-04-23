@@ -4,7 +4,7 @@ const defaultResponse = require('../utils/responseDefault');
 const login = async (req, res) => {
     try {
         const result = await service.login(req);
-        res.status(200).json(defaultResponse("SUCCESS",{ data: result },req));
+        res.status(200).json(defaultResponse("SUCCESS", result, req));
     } catch (error) {
         res.status(500).json(defaultResponse("INTERNAL_ERROR", { error: error.message }, req));
     }

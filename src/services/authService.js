@@ -1,9 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
-const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN;
+const { v4: uuidv4 } = require('uuid');
+const redisClient = require('../configs/redis');
 
 const comparePassword = async (inputPassword, storedHash) => {
   const normalizedHash = storedHash.replace(/^\$2y\$/, '$2b$');
@@ -26,16 +24,27 @@ const buildTokenPayload = (user) => {
     };
 };
 
+const generateTokens = async (user) => {
+  const sessionId = uuidv4();
+  const sessionData = buildTokenPayload(user);
 
-const generateTokens = (user) => {
-  const payload = buildTokenPayload(user);
-  const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-  const refreshToken = jwt.sign({ sub: user.id }, JWT_SECRET, { expiresIn: JWT_REFRESH_EXPIRES_IN });
+  // Store session in Redis with expiration
+  await redisClient.set(`session:${sessionId}`, JSON.stringify(sessionData), {
+    EX: 60 * 60, // 1 hour
+  });
+
+  const accessToken = jwt.sign({ jti: sessionId }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || '1h',
+  });
+
+  const refreshToken = jwt.sign({ sub: user[0].user_id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+  });
 
   return {
     accessToken,
     refreshToken,
-    expiresIn: JWT_EXPIRES_IN,
+    expiresIn: process.env.JWT_EXPIRES_IN,
   };
 };
 

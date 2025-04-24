@@ -11,12 +11,10 @@ const login = async (req) => {
     }
 
     const userDetail = await repository.getUserById(user.id); 
-    const tokens = authService.generateTokens(userDetail);
+    const tokens = await authService.generateTokens(userDetail);
     await repository.storeRefreshToken(user.id, tokens.refreshToken, JWT_REFRESH_EXPIRES_IN);
 
-    return {
-        tokens,
-    };
+    return { tokens };
 };
 
 module.exports = { login };

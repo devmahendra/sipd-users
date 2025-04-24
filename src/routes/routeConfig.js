@@ -9,7 +9,8 @@ const routeConfigs = [
     method: "POST",
     description: "Login User",
     handler: controller.login,
-    validation: schema.loginSchema
+    validation: schema.loginSchema,
+    protected: false,
   }
 ];
 

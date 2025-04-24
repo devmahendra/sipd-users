@@ -1,15 +1,15 @@
-const controller = require("../controllers/controller");
-const schema = require("../schemas/schema");
+const userController = require("../controllers/userController");
+const userSchema = require("../schemas/userSchema");
 
 const routeConfigs = [
   {
-    id: "50",
+    id: "10",
     name: "login",
     path: "/v1.0/users/login",
     method: "POST",
     description: "Login User",
-    handler: controller.login,
-    validation: schema.loginSchema,
+    handler: userController.login,
+    validation: userSchema.loginSchema,
     protected: false,
   }
 ];

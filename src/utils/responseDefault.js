@@ -1,4 +1,4 @@
-const responseCodes = require("./responseCode");
+const responseCodes = require("../constants/responseCode");
 
 const responseDefault = (responseType, data = null, req = null) => {
   const response = responseCodes[responseType];

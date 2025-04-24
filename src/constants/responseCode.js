@@ -11,6 +11,12 @@ const responseCodes = {
       MESSAGE: "Invalid request parameters",
       STATUS: "Error",
     },
+    UNAUTHORIZED: {
+      CODE: "40",
+      HTTP_CODE: 401,
+      MESSAGE: "Unauthorized",
+      STATUS: "Error",
+    },
     VALIDATION_ERROR: {
       CODE: "40",
       HTTP_CODE: 401,

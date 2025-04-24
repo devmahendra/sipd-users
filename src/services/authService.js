@@ -27,10 +27,8 @@ const buildTokenPayload = (user) => {
 const generateTokens = async (user) => {
   const sessionId = uuidv4();
   const sessionData = buildTokenPayload(user);
-
-  // Store session in Redis with expiration
-  await redisClient.set(`session:${sessionId}`, JSON.stringify(sessionData), {
-    EX: 60 * 60, // 1 hour
+  await redisClient.set(`${sessionId}`, JSON.stringify(sessionData), {
+    EX: 60 * 60, 
   });
 
   const accessToken = jwt.sign({ jti: sessionId }, process.env.JWT_SECRET, {

@@ -1,19 +1,29 @@
-// middlewares/getUserFromToken.js
 const jwt = require('jsonwebtoken');
+const redisClient = require('../configs/redis');
+const responseDefault = require('../utils/responseDefault');
 
-const getRequestToken = (req, res, next) => {
+const getRequestToken = async (req, res, next) => {
   const token = req.cookies.accessToken; 
 
   if (!token) {
-    return res.status(401).json({ message: 'No token provided' });
+    const response = responseDefault('MISSING_FIELDS', null, req);
+    return res.status(response.HTTP_CODE).json(response);
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; 
+    const sessionData = await redisClient.get(decoded.jti);
+
+    if (!sessionData) {
+      const response = responseDefault('UNAUTHORIZED', null, req);
+      return res.status(response.HTTP_CODE).json(response);
+    }
+    
+    req.user = JSON.parse(sessionData); 
     next();
   } catch (err) {
-    return res.status(401).json({ message: 'Invalid or expired token' });
+    const response = responseDefault('INTERNAL_ERROR', null, req);
+    return res.status(response.HTTP_CODE).json(response);
   }
 };
 

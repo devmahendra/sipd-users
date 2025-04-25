@@ -26,9 +26,6 @@ module.exports = async function getRouteConfigs() {
                 EX: 3600, // Expiry time: 1 hour
             });
 
-            // Log to confirm the routes are set in Redis
-            await redisClient.get(ROUTES_CACHE_KEY);
-
             return rows; // Return the fetched routes from the DB
 
         } catch (err) {

@@ -1,26 +1,15 @@
 const defaultResponse = require("../utils/responseDefault");
 
-const validateRequest = (routeConfigs) => (req, res, next) => {
+const validateRequest = (route) => (req, res, next) => {
   try {
-    const matchedRoute = routeConfigs.find(
-      (route) => route.path === req.route.path && route.method.toUpperCase() === req.method
-    );
+    req.serviceCode = route.id;
 
-    if (!matchedRoute) {
-      return res.status(400).json(defaultResponse("INVALID_ROUTE", {}, req));
-    }
-
-    req.serviceCode = matchedRoute.id;
-
-    if (matchedRoute.validation) {
-      const { error, value } = matchedRoute.validation.validate(req.body, { abortEarly: false });
+    if (route.validation) {
+      const { error, value } = route.validation.validate(req.body, { abortEarly: false });
 
       if (error) {
         const errors = error.details.map((err) => err.message);
-
-        return res.status(400).json(
-          defaultResponse("VALIDATION_ERROR", { errors }, req)
-        );
+        return res.status(400).json(defaultResponse("VALIDATION_ERROR", { errors }, req));
       }
 
       req.body = value;
@@ -29,9 +18,7 @@ const validateRequest = (routeConfigs) => (req, res, next) => {
     next();
   } catch (error) {
     console.error("Error in validate request:", error.message);
-    return res.status(500).json(
-      defaultResponse("INTERNAL_ERROR", { error: error.message }, req)
-    );
+    return res.status(500).json(defaultResponse("INTERNAL_ERROR", { error: error.message }, req));
   }
 };
 

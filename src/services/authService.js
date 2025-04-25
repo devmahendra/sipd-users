@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
-const redisClient = require('../configs/redis');
+const { redisClient } = require('../configs/redis');
 
 const comparePassword = async (inputPassword, storedHash) => {
   const normalizedHash = storedHash.replace(/^\$2y\$/, '$2b$');

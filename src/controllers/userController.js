@@ -1,9 +1,13 @@
 const userService = require('../services/userService');
 const defaultResponse = require('../utils/responseDefault');
 const { hasPermission } = require('../utils/permission');
+const logEvent = require('../helpers/logHelper');
 
 const login = async (req, res) => {
     const { username, password } = req.body;
+    const { routeId, routeName } = req;
+    let processName = 'user authentication'
+
     try {
         const result = await userService.login(username, password);
         if (res.status(200)) {
@@ -20,9 +24,28 @@ const login = async (req, res) => {
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
                 sameSite: 'None',
             });
+
+            logEvent({
+                message: 'LOGIN_SUCCESS',
+                routeId,
+                routeName,
+                processName: processName,
+                req,
+            });
         }
         res.status(200).json(defaultResponse("SUCCESS", null, req));
     } catch (error) {
+        logEvent({
+            message: 'LOGIN_FAILED',
+            routeId,
+            routeName,
+            processName: processName,
+            signal: 'E',
+            req,
+            level: 'error',
+            extra: { error: error.message }
+        });
+
         res.status(500).json(defaultResponse("INTERNAL_ERROR", { error: error.message }, req));
     }
 };

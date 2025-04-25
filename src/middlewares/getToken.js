@@ -1,13 +1,12 @@
 const jwt = require('jsonwebtoken');
-const redisClient = require('../configs/redis');
+const { redisClient } = require('../configs/redis');
 const responseDefault = require('../utils/responseDefault');
 
 const getRequestToken = async (req, res, next) => {
   const token = req.cookies.accessToken; 
 
   if (!token) {
-    const response = responseDefault('MISSING_FIELDS', null, req);
-    return res.status(response.HTTP_CODE).json(response);
+    return res.status(400).json(responseDefault("MISSING_FIELDS", null, req));
   }
 
   try {
@@ -15,15 +14,13 @@ const getRequestToken = async (req, res, next) => {
     const sessionData = await redisClient.get(decoded.jti);
 
     if (!sessionData) {
-      const response = responseDefault('UNAUTHORIZED', null, req);
-      return res.status(response.HTTP_CODE).json(response);
+      return res.status(401).json(responseDefault("UNAUTHORIZED", null, req));
     }
     
     req.user = JSON.parse(sessionData); 
     next();
   } catch (err) {
-    const response = responseDefault('INTERNAL_ERROR', null, req);
-    return res.status(response.HTTP_CODE).json(response);
+    res.status(500).json(responseDefault("INTERNAL_ERROR", null, req));
   }
 };
 

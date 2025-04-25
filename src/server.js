@@ -2,6 +2,7 @@ require('dotenv').config({ path: __dirname + '/../.env' });
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const { connectRedis } = require('./configs/redis');
 const initializeRoutes = require('./routes/route');
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 (async () => {
     try {
+        await connectRedis();
         await initializeRoutes(app); 
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);

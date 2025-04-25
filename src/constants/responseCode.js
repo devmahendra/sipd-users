@@ -17,6 +17,12 @@ const responseCodes = {
       MESSAGE: "Unauthorized",
       STATUS: "Error",
     },
+    FORBIDDEN: {
+      CODE: "40",
+      HTTP_CODE: 403,
+      MESSAGE: "Forbidden Access",
+      STATUS: "Error",
+    },
     VALIDATION_ERROR: {
       CODE: "40",
       HTTP_CODE: 401,

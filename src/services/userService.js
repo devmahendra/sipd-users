@@ -3,8 +3,7 @@ const userRepository = require('../repositories/userRepository');
 
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN;
 
-const login = async (req) => {
-    const { username, password } = req.body;
+const login = async (username, password) => {
     const user = await userRepository.getUserByUsername(username);
     if (!user || !await authService.comparePassword(password, user.password || '')) {
         throw new Error('Invalid credentials');
@@ -17,4 +16,15 @@ const login = async (req) => {
     return { tokens };
 };
 
-module.exports = { login };
+const getData = async (page, limit) => {
+    try {
+        const result = await userRepository.getData(page, limit);
+        console.log(`Success retrieve: ${result.totalRecords} rows.`);
+      return result;
+    } catch (error) {
+        console.error(`Failed retrieve data with error: ${error.message}.`);
+        throw error;
+    }
+};
+
+module.exports = { login, getData };

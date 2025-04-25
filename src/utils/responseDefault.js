@@ -7,7 +7,7 @@ const responseDefault = (responseType, data = null, req = null) => {
     throw new Error(`Invalid response type: ${responseType}`);
   }
 
-  const serviceCode = req?.serviceCode ? req.serviceCode.padStart(2, "0") : "00";
+  const serviceCode = req?.serviceCode ? String(req.serviceCode).padStart(2, "0") : "00";
 
   const responseCode = `${response.HTTP_CODE}${serviceCode}${response.CODE}`;
 
@@ -24,3 +24,4 @@ const responseDefault = (responseType, data = null, req = null) => {
 };
 
 module.exports = responseDefault;
+

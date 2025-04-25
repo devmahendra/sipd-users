@@ -62,4 +62,41 @@ const storeRefreshToken = async (userId, token, refreshExpiresIn) => {
   }
 };
 
-module.exports = { getUserByUsername, getUserById, storeRefreshToken };
+const getData = async (page, limit) => {
+  try {
+    const offset = (page - 1) * limit;
+    const values = [parseInt(limit), parseInt(offset)];
+
+    const dataQuery = `
+      SELECT
+        u.id,
+        u.username,
+        up.first_name,
+        up.last_name,
+        up.email,
+        u.status
+      FROM users u
+      JOIN user_profile up ON up.user_id = u.id
+      WHERE u.deleted_at IS NULL
+      ORDER BY u.created_at DESC
+      LIMIT $1 OFFSET $2
+    `;
+
+    const countQuery = `SELECT COUNT(*) FROM users WHERE deleted_at IS NULL`;
+
+    const { rows: data } = await pool.query(dataQuery, values);
+    const { rows } = await pool.query(countQuery);
+    const totalRecords = parseInt(rows[0].count);
+
+    return {
+      totalRecords,
+      totalPages: Math.ceil(totalRecords / limit),
+      currentPage: parseInt(page),
+      data,
+    };
+  } catch (error) {
+    throw new Error(`Failed to get data: ${error.message}`);
+  }
+};
+
+module.exports = { getUserByUsername, getUserById, storeRefreshToken, getData };

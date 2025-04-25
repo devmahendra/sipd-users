@@ -30,11 +30,9 @@ const generateTokens = async (user) => {
   await redisClient.set(`${sessionId}`, JSON.stringify(sessionData), {
     EX: 60 * 60, 
   });
-
   const accessToken = jwt.sign({ jti: sessionId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || '1h',
   });
-
   const refreshToken = jwt.sign({ sub: user[0].user_id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   });

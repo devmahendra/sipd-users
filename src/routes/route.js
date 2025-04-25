@@ -1,22 +1,41 @@
 const express = require("express");
 const router = express.Router();
-const routeConfigs = require("./routeConfig");
-const validateRequest = require("../middlewares/validateRequest")(routeConfigs);
-const getRequestToken = require("../middlewares/getToken"); 
+const getRouteConfigs = require("../middlewares/getRoute");
+const getToken = require("../middlewares/getToken");
+const validateRequest = require("../middlewares/validateRequest");
+const handlerMap = require("./routeHandler");
+const validationMap = require("./routeValidation");
 
-routeConfigs.forEach((route) => {
-  const middlewares = [(req, res, next) => {
-    req.routeConfig = route;
-    next();
-  }]; 
+module.exports = async function initializeRoutes(app) {
+  const routeConfigsObj = await getRouteConfigs(); 
+  const routeConfigs = Object.values(routeConfigsObj);
 
-  if (route.protected) {
-    middlewares.push(getRequestToken);
-  }
+  routeConfigs.forEach((route) => {
+    const middlewares = [
+      (req, res, next) => {
+        req.routeConfig = route;
+        req.routeId = route.id;
+        next();
+      },
+    ];
 
-  middlewares.push(validateRequest)
+    if (route.protected) {
+      middlewares.push(getToken);
+    }
 
-  router[route.method.toLowerCase()](route.path, ...middlewares, route.handler);
-});
+    if (validationMap[route.name]) {
+      middlewares.push(validateRequest(routeConfigs)); 
+    }
 
-module.exports = router;
+    const handler = handlerMap[route.name];
+    if (!handler) {
+      console.warn(`No handler for route ${route.name}`);
+      return;
+    }
+
+    router[route.method.toLowerCase()](route.path, ...middlewares, handler);
+  });
+
+  app.use("/api", router);
+};
+

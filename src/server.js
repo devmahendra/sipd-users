@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const routes = require('./routes/route');
 const cookieParser = require('cookie-parser');
+const initializeRoutes = require('./routes/route');
 
 const app = express();
 const PORT = process.env.MS_PORT || 3000;
@@ -16,9 +17,15 @@ app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
-app.use('/api', routes);
-
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+(async () => {
+    try {
+        await initializeRoutes(app); 
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    } catch (err) {
+        console.error("Failed to initialize routes:", err);
+        process.exit(1);
+    }
+})();
 

@@ -29,11 +29,11 @@ const login = async (req, res) => {
 
 const getData = async (req, res) => {
     const user = req.user;
-    const routeId = req.routeId
+    const menuId = req.menuId
     const page = parseInt(req.body.page) || 1;
     const limit = parseInt(req.body.limit) || 10;
 
-    if (!hasPermission(user, routeId, 'r')) {
+    if (!hasPermission(user, menuId, 'r')) {
         return res.status(403).json(defaultResponse("FORBIDDEN", null, req));
     }
 

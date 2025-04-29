@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 7
+    },
+    "auditLog": "/Users/mahendrabayuwardhana/Belajar/git/sipd-users/src/logs/.631eb1271bd2e5e9a6058e903bb4686bb76a4c9b-audit.json",
+    "files": [
+        {
+            "date": 1745892923977,
+            "name": "/Users/mahendrabayuwardhana/Belajar/git/sipd-users/src/logs/application-2025-04-29.log",
+            "hash": "3efa2f45d2353d824d0d71f351a7e2373ea523a260805d07e7a197c6f0798b39"
+        }
+    ],
+    "hashType": "sha256"
+}

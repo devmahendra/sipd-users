@@ -1,3 +1,5 @@
+// src/configs/logstash.js
+
 const { transports, format } = require('winston');
 const net = require('net');
 const { combine, timestamp, json } = format;

@@ -1,6 +1,5 @@
 // requestContext.js
-const { AsyncLocalStorage } = require('async_hooks');
-const asyncLocalStorage = new AsyncLocalStorage();
+const { asyncLocalStorage } = require('../utils/asyncContext');
 
 const requestContext = (req, res, next) => {
   asyncLocalStorage.run(new Map(), () => {

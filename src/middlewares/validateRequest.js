@@ -1,5 +1,5 @@
 const defaultResponse = require("../utils/responseDefault");
-const logger = require("../utils/logger"); // import your logger
+const { logData } = require('../utils/logger');
 
 const validateRequest = (route) => (req, res, next) => {
   let processName = 'VALIDATE_REQUEST'
@@ -11,34 +11,28 @@ const validateRequest = (route) => (req, res, next) => {
 
       if (error) {
         const errors = error.details.map((err) => err.message);
-
-        // ✅ Log validation failure
-        logger.logData({
+        logData({
           level: 'warn',
           proccessName: processName,
-          proccessMessage: { errors }
+          signal: 'E',
+          reason: 'VALIDATION_ERROR ' + errors,
+          statusCode: 400,
         });
 
         return res.status(400).json(defaultResponse('VALIDATION_ERROR', { errors }, req));
       }
-
-      // ✅ Log validation success
-      logger.logData({
-        level: 'info',
-        proccessName: processName,
-        proccessMessage: ''
-      });
-
+      logData({ proccessName: processName, statusCode: 200 });
       req.body = value;
     }
-
+ 
     next();
   } catch (error) {
-    // ✅ Log unexpected error
-    logger.logData({
+    logData({
       level: 'error',
       proccessName: processName,
-      proccessMessage: error.message
+      signal: 'E',
+      reason: 'INTERNAL_ERROR ' + error.message,
+      statusCode: 500,
     });
 
     return res.status(500).json(defaultResponse('INTERNAL_ERROR', { error: error.message }, req));

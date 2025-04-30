@@ -6,7 +6,6 @@ module.exports = new DailyRotateFile({
   datePattern: 'YYYY-MM-DD',
   maxSize: '20m',
   maxFiles: '14d',
-  level: process.env.logLevels || 'info',
   format: format.combine(
     format.timestamp(),
     format.printf(info => {

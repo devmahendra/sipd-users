@@ -40,66 +40,71 @@ const logData = (logObject) => {
   const responseBody = store?.get('data')?.responseBody || {};
   const responseHeader = store?.get('data')?.responseHeader || {};
 
+  const statusCode = logObject.statusCode || store?.get('statusCode') || '   ';
+
+  // Auto-deduce level and signal
+  let level = logObject.level;
+  let signal = logObject.signal;
+
+  if (!level) {
+    if (statusCode === 500) {
+      level = 'error';
+    } else if (statusCode !== 200 && statusCode !== '   ') {
+      level = 'warn';
+    } else {
+      level = 'info';
+    }
+  }
+
+  if (!signal) {
+    signal = statusCode !== 200 ? 'E' : 'S';
+  }
+
   const context = {
     requestId: store?.get('requestId') || null,
     sequence: store?.get('sequence') || 1,
-    signal: logObject.signal || store?.get('signal') || 'N',
+    signal,
     device: store?.get('device') || 0,
     ip: store?.get('ip') || 'N/A',
     method: store?.get('method') || 'N/A',
     path: addPadding(store?.get('path'), 50) || 'N/A',
-    statusCode: logObject.statusCode || '   ',
-    reason: logObject.reason || 'N/A',
+    statusCode,
     proccessName: addPadding(logObject.proccessName, 25) || '',
     timestamp: now.toISOString(),
     logTime: formatDate(),
   };
 
-  if (logObject.reason && logObject.reason.trim() !== '') {
-    context.reason = logObject.reason;
-  }
-  if (Object.keys(requestBody).length > 0) {
-    context.data = context.data || {};
-    context.data.requestBody = requestBody;
-  }
-  if (Object.keys(requestHeader).length > 0) {
-    context.data = context.data || {};
-    context.data.requestHeader = requestHeader;
-  }
-  if (Object.keys(responseBody).length > 0) {
-    context.data = context.data || {};
-    context.data.responseBody = responseBody;
-  }
-  if (Object.keys(responseHeader).length > 0) {
-    context.data = context.data || {};
-    context.data.responseHeader = responseHeader;
-  }
-  if (Object.keys(responseHeader).length > 0) {
-    context.data = context.data || {};
-    context.data.responseHeader = responseHeader;
+  const reason = logObject.reason?.trim();
+  if (reason && reason !== 'N/A') {
+    context.reason = reason;
   }
 
+  const data = {};
+  if (Object.keys(requestBody).length) data.requestBody = requestBody;
+  if (Object.keys(requestHeader).length) data.requestHeader = requestHeader;
+  if (Object.keys(responseBody).length) data.responseBody = responseBody;
+  if (Object.keys(responseHeader).length) data.responseHeader = responseHeader;
+  if (Object.keys(data).length) context.data = data;
+
   let message = `reqId: ${context.requestId} seq: ${context.sequence} proccessName:${context.proccessName} signal:${context.signal} device:${context.device} ip:${context.ip} path:${context.method} ${context.path} statusCode:${context.statusCode} data:${JSON.stringify(context.data)}`;
-  
-  if (context.reason !== undefined && context.reason !== null && context.reason !== 'N/A') {
+  if (context?.reason) {
     message += ` reason:${context.reason}`;
   }
 
-  // Log to normal logger (with message)
   mainLogger.log({
     appName: process.env.APP_NAME,
-    level: logObject.level || 'info',
+    level,
     message,
     ...context
   });
 
-  // Log to logstash (without message)
   logstashOnlyLogger.log({
     appName: process.env.APP_NAME,
-    level: logObject.level || 'info',
-    ...context // NO message
+    level,
+    ...context
   });
 };
+
 
 module.exports = {
   logger: mainLogger,

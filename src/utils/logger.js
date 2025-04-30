@@ -1,9 +1,14 @@
 const winston = require('winston');
-const { transports, format } = winston;
-const LogstashTCPTransport = require('../configs/logstash'); // Assuming logstash transport is set correctly
-const { getLogContext } = require('./logContext');
+const { asyncLocalStorage } = require('./asyncContext');
+const { addPadding } = require('../helpers/padding');
+const { formatDate } = require('../helpers/dateFormatter');
 
-// Custom log level mapping
+// Transports
+const consoleLogger = require('./loggers/consoleLogger');
+const fileLogger = require('./loggers/fileLogger');
+const logstashLogger = require('./loggers/logstashLogger');
+
+// Custom log levels
 const logLevels = {
   info: 0,
   warn: 1,
@@ -11,28 +16,61 @@ const logLevels = {
   debug: 3
 };
 
-const logger = winston.createLogger({
+// Create main logger (with message)
+const mainLogger = winston.createLogger({
   levels: logLevels,
-  transports: [
-    new transports.Console({ format: format.combine(format.colorize(), format.simple()) }),
-    new LogstashTCPTransport({ host: '192.168.4.38', port: 5044 }) // Logstash transport
-  ]
+  transports: [consoleLogger, fileLogger],
 });
 
-// Custom log function to add context from AsyncLocalStorage
+// Create logstash-only logger (no message)
+const logstashOnlyLogger = winston.createLogger({
+  levels: logLevels,
+  transports: [logstashLogger],
+});
+
+// Centralized logData
 const logData = (logObject) => {
-  const context = getLogContext();
-  logger.log({
+  const store = asyncLocalStorage.getStore();
+  const now = new Date();
+  const context = {
+    requestId: store?.get('requestId') || null,
+    sequence: store?.get('sequence') || 1,
+    signal: store?.get('signal') || 'N',
+    device: store?.get('device') || 0,
+    ip: store?.get('ip') || 'N/A',
+    method: store?.get('method') || 'N/A',
+    path: addPadding(store?.get('path'), 50) || 'N/A',
+    statusCode: logObject.statusCode || 'N/A',
+    proccessName: addPadding(logObject.proccessName, 25) || '',
+    data: store?.get('data') || {
+      requestHeader: {},
+      requestBody: {},
+      responseHeader: {},
+      responseBody: {}
+    },
+    timestamp: now.toISOString(),
+    logTime: formatDate(),
+  };
+
+  const message = `reqId: ${context.requestId} seq: ${context.sequence} proccessName:${context.proccessName} signal:${context.signal} device:${context.device} ip:${context.ip} path:${context.method} ${context.path} status:${context.statusCode} data:${JSON.stringify(context.data)}`;
+
+  // Log to normal logger (with message)
+  mainLogger.log({
+    appName: process.env.APP_NAME,
     level: logObject.level || 'info',
-    ...context,
-    message: logObject.proccessMessage,
-    proccessName: logObject.proccessName,
-    statusCode: logObject.statusCode,
-    ...logObject,
+    message,
+    ...context
+  });
+
+  // Log to logstash (without message)
+  logstashOnlyLogger.log({
+    appName: process.env.APP_NAME,
+    level: logObject.level || 'info',
+    ...context // NO message
   });
 };
 
 module.exports = {
-  logger,
-  logData // Export logData separately
+  logger: mainLogger,
+  logData
 };

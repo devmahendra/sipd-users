@@ -1,4 +1,3 @@
-// logContext.js
 const { asyncLocalStorage } = require('./asyncContext');
 
 function getLogContext() {

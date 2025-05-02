@@ -1,6 +1,6 @@
 const { asyncLocalStorage } = require('../utils/asyncContext');
 const { v4: uuidv4 } = require('uuid');
-const { logData } = require('../utils/logger');
+const { logData } = require('../utils/loggers');
 const { maskSensitive } = require('../helpers/mask');
 const { incrementSequence } = require('../helpers/incrementSequence'); 
 

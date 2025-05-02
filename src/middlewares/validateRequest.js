@@ -1,5 +1,5 @@
 const defaultResponse = require("../utils/responseDefault");
-const { logData } = require('../utils/logger');
+const { logData } = require('../utils/loggers');
 
 const validateRequest = (route) => (req, res, next) => {
   let processName = 'VALIDATE_REQUEST'

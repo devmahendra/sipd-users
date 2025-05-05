@@ -1,40 +1,59 @@
 const { redisClient } = require("../configs/redis"); 
-const pool = require("../configs/db"); 
+const { getRoutes } = require("../repositories/sysRepository");
+const { logData } = require('../utils/loggers');
 
 module.exports = async function getRouteConfigs() {
     const ROUTES_CACHE_KEY = "cached:routes";
+    let proccessName = 'GET_ROUTES';
   
     try {
       const cached = await redisClient.get(ROUTES_CACHE_KEY);
   
       if (cached && cached !== '[]') {
+        logData({
+          level: 'info',
+          proccessName: proccessName,
+          data: 'Routes retrieved from Redis',
+        });
         return JSON.parse(cached);
       }
     } catch (err) {
-      console.error("⚠️ Redis get failed, fallback to DB:", err.message);
+      logData({
+        level: 'warn',
+        proccessName: proccessName,
+        data: (`Redis get failed, fallback to DB:`, err.message)
+      });
     }
   
     try {
-      const { rows } = await pool.query(`
-        SELECT id, name, path, method, description, protected, menu_id, action_type 
-        FROM routes 
-        WHERE status = 'approved'
-      `);
+      const rows = await getRoutes();
   
       if (rows.length > 0) {
         try {
           await redisClient.set(ROUTES_CACHE_KEY, JSON.stringify(rows), {
             EX: 3600
           });
-          console.log("✅ Routes cached to Redis");
+          logData({
+            level: 'info',
+            proccessName: proccessName,
+            data: 'Routes cached to Redis',
+          });
         } catch (err) {
-          console.error("⚠️ Redis set failed:", err.message);
+          logData({
+            level: 'warn',
+            proccessName: proccessName,
+            data: (`Redis set failed:`, err.message)
+          });
         }
       }
   
       return rows;
-    } catch (dbErr) {
-      console.error("❌ DB query failed:", dbErr.message);
+    } catch (err) {
+      logData({
+        level: 'error',
+        proccessName: proccessName,
+        data: (`DB query failed:`, err.message)
+      });
       return []; 
     }
   };

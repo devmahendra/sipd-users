@@ -15,7 +15,6 @@ const validateRequest = (route) => (req, res, next) => {
         const errors = error.details.map((err) => err.message);
         logData({
           proccessName: processName,
-          reason: 'VALIDATION_ERROR ' + errors,
           statusCode: httpCode,
         });
 

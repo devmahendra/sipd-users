@@ -1,5 +1,6 @@
 const { format } = require('winston');
 const DailyRotateFile = require('winston-daily-rotate-file');
+const { addPadding } = require('../helpers/padding');
 
 module.exports = new DailyRotateFile({
   filename: 'src/logs/%DATE%.log',
@@ -9,7 +10,7 @@ module.exports = new DailyRotateFile({
   format: format.combine(
     format.timestamp(),
     format.printf(info => {
-      return `${info.level} ${info.logTime} ${info.message}`;
+      return `${addPadding(info.level, 5)} ${info.logTime} ${info.message}`;
     })
   )
 });

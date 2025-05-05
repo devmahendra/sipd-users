@@ -1,10 +1,11 @@
 const { transports, format } = require('winston');
+const { addPadding } = require('../helpers/padding');
 
 module.exports = new transports.Console({
   format: format.combine(
     format.colorize(),
     format.printf(info => {
-      return `${info.level} ${info.logTime} ${info.message}`;
+      return `${addPadding(info.level, 5)} ${info.logTime} ${info.message}`;
     })
   )
 });

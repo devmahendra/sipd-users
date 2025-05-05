@@ -1,14 +1,25 @@
 const { createClient } = require('redis');
+const { logData } = require('../utils/loggers');
+
+const proccessName = 'REDIS_CLIENT';
 
 const redisClient = createClient({
-  url: process.env.REDIS_URL || 'redis://localhost:6379',
+  url: process.env.REDIS_URL,
   socket: {
     reconnectStrategy: (retries) => {
       if (retries > 10) {
-        console.error('❌ Too many Redis reconnect attempts. Giving up.');
+        logData({
+          level: 'error',
+          proccessName: proccessName,
+          data: 'Too many Redis reconnect attempts. Giving up. Reconnect failed.',
+        });
         return new Error('Redis reconnect failed');
       }
-      console.warn(`⚠️ Retrying Redis connection... attempt ${retries}`);
+      logData({
+        level: 'warn',
+        proccessName: proccessName,
+        data: `Retrying Redis connection... attempt ${retries}`,
+      });
       return Math.min(retries * 100, 3000); // exponential backoff, max 3s
     }
   }
@@ -16,33 +27,56 @@ const redisClient = createClient({
 
 // Listen for client-level errors
 redisClient.on('error', (err) => {
-  console.error('❌ Redis Client Error:', err.message || err);
+  logData({
+    level: 'error',
+    proccessName: proccessName,
+    data: `Redis client error: ${err.message || err}`,
+  });
 });
 
 redisClient.on('reconnecting', () => {
-  console.warn('⚠️ Redis reconnecting...');
+  logData({
+    level: 'warn',
+    proccessName: proccessName,
+    data: 'Redis client reconnecting...',
+  });
 });
 
 redisClient.on('connect', () => {
-  console.log('✅ Redis attempting connection...');
+  logData({
+    level: 'warn',
+    proccessName: proccessName,
+    data: 'Redis attempting connection...',
+  });
 });
 
 redisClient.on('ready', () => {
-  console.log('✅ Redis is ready!');
+  logData({
+    level: 'info',
+    proccessName: proccessName,
+    data: 'Redis is ready!',
+  });
 });
 
 async function connectRedis() {
   if (!redisClient.isOpen) {
     try {
       await redisClient.connect();
-      console.log('✅ Redis connected successfully');
+      logData({
+        level: 'info',
+        proccessName: proccessName,
+        data: 'Redis connected successfully',
+      });
     } catch (err) {
-      console.error('🚨 Redis connection failed:', err.message || err);
+      logData({
+        level: 'error',
+        proccessName: proccessName,
+        data: `Redis connection failed: ${err.message || err}`,
+      });
     }
   }
 }
 
-// Immediately try to connect (optional: you can delay or conditionally call this in main app)
 connectRedis();
 
 module.exports = { redisClient, connectRedis };

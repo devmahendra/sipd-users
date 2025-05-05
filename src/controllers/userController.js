@@ -4,9 +4,11 @@ const { hasPermission } = require('../utils/permission');
 
 const login = async (req, res) => {
     const { username, password } = req.body;
-
+    const ip = req.ip || req.socket.remoteAddress
+    const userAgent = req.headers['user-agent'] || 'unknown';
+    const loginAt = new Date();
     try {
-        const result = await userService.login(username, password);
+        const result = await userService.login(username, password, ip, userAgent, loginAt);
         if (res.status(200)) {
             res.cookie('accessToken', result.tokens.accessToken, {
                 httpOnly: true,

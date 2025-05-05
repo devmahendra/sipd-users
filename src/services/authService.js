@@ -8,7 +8,7 @@ const comparePassword = async (inputPassword, storedHash) => {
   return bcrypt.compare(inputPassword, normalizedHash);
 };
 
-const buildTokenPayload = (user) => {
+const buildTokenPayload = (user, ip, agent, loginAt) => {
   const base = user[0]
     return {
         id: base.user_id, 
@@ -21,19 +21,24 @@ const buildTokenPayload = (user) => {
             u: item.can_update,
             d: item.can_delete,
         })),
+        meta: {
+          ip: ip,
+          agent: agent,
+          loginAt: loginAt,
+        },
     };
 };
 
-const generateTokens = async (user) => {
+const generateTokens = async (user, ip, agent, loginAt) => {
   const sessionId = uuidv4();
-  const sessionData = buildTokenPayload(user);
+  const sessionData = buildTokenPayload(user, ip, agent, loginAt);
   await redisClient.set(`${sessionId}`, JSON.stringify(sessionData), {
     EX: 60 * 60, 
   });
   const accessToken = jwt.sign({ jti: sessionId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || '1h',
   });
-  const refreshToken = jwt.sign({ sub: user[0].user_id }, process.env.JWT_SECRET, {
+  const refreshToken = jwt.sign({ sub: user[0].user_id, jti: sessionId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   });
 

@@ -3,14 +3,14 @@ const userRepository = require('../repositories/userRepository');
 
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN;
 
-const login = async (username, password) => {
+const login = async (username, password, ip, userAgent, loginAt) => {
     const user = await userRepository.getUserByUsername(username);
     if (!user || !await authService.comparePassword(password, user.password || '')) {
         throw new Error('Invalid credentials');
     }
 
     const userDetail = await userRepository.getUserById(user.id); 
-    const tokens = await authService.generateTokens(userDetail);
+    const tokens = await authService.generateTokens(userDetail, ip, userAgent, loginAt);
     await userRepository.storeRefreshToken(user.id, tokens.refreshToken, JWT_REFRESH_EXPIRES_IN);
 
     return { tokens };

@@ -56,6 +56,11 @@ const storeRefreshToken = async (userId, token, refreshExpiresIn) => {
     await client.query(`
         INSERT INTO refresh_tokens (user_id, token, expires_at)
         VALUES ($1, $2, NOW() + $3::interval)
+        ON CONFLICT (user_id) DO UPDATE
+        SET token = EXCLUDED.token,
+        expires_at = EXCLUDED.expires_at,
+        created_at = NOW(),
+        revoked = false;
     `, [userId, token, refreshExpiresIn]);
   } finally {
     client.release();

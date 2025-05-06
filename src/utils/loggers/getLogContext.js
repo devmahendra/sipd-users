@@ -3,12 +3,12 @@ const { addPadding } = require('../../helpers/padding');
 
 function getLogContext(logObject, now, formatDate) {
   const store = asyncLocalStorage.getStore();
-
+  const currentSeq = store?.get('sequence') || 1;
   const isSystemLog = !store?.get('requestId') && !logObject.requestId;
 
   const requestContext = {
     requestId: addPadding(store?.get('requestId'), 36) || 'N/A',
-    sequence: store?.get('sequence') || 1,
+    sequence: currentSeq,
     device: addPadding(store?.get('device'), 5) || 0,
     signal: store?.get('signal') || 'N',
     ip: addPadding(store?.get('ip'), 15) || 'N/A',

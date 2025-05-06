@@ -2,7 +2,6 @@ const { asyncLocalStorage } = require('../utils/asyncContext');
 const { v4: uuidv4 } = require('uuid');
 const { logData } = require('../utils/loggers');
 const { maskSensitive } = require('../helpers/mask');
-const { incrementSequence } = require('../helpers/incrementSequence'); 
 
 const requestLogger = (req, res, next) => {
   const requestId = req.headers['x-request-id'] || uuidv4();
@@ -16,7 +15,6 @@ const requestLogger = (req, res, next) => {
     store.set('method', req.method || 'N/A');
     store.set('path', req.originalUrl || 'N/A');
     store.set('ip', req.headers['x-forwarded-for'] || req.ip || 'N/A');
-    store.set('sequence', 1);
 
     const data = {
       requestHeader: maskSensitive(req.headers || {}),
@@ -56,22 +54,21 @@ const requestLogger = (req, res, next) => {
   res.on('finish', () => {
     const store = asyncLocalStorage.getStore();
     if (store) {
-      incrementSequence(); 
       store.set('signal', 'S');
 
       const data = store.get('data') || {};
       data.responseHeader = maskSensitive(res.getHeaders() || {});
       store.set('data', data);
       logData({
+        level: 'info',
         proccessName: 'RESPONSE_SENT',
         statusCode: res.statusCode,
       });
     }
   });
 
-  logData({ proccessName: 'REQUEST_RECEIVED' });
+  logData({ level: 'info', proccessName: 'REQUEST_RECEIVED' });
 
-  incrementSequence(); 
   next();
 };
 

@@ -1,6 +1,7 @@
+const authController = require("../controllers/authController");
 const userController = require("../controllers/userController");
 
 module.exports = {
-    login: userController.login,
-    get_user: userController.getData,
+    LOGIN: authController.login,
+    GET_USER: userController.getData,
 };

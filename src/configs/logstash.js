@@ -1,57 +1,82 @@
 const { transports, format } = require('winston');
 const net = require('net');
+const { Writable } = require('stream');
 const { combine, timestamp, json } = format;
 
 class LogstashTCPTransport extends transports.Stream {
   constructor({ host, port, maxRetries = 5, retryDelay = 2000 }) {
     let socket = new net.Socket();
     let retries = 0;
+    let proccessName = 'LOGSTASH_CLIENT';
+
+    const log = (logObject, mode = 2) => {
+      const { logData } = require('../utils/loggers');
+      logData(logObject, mode);
+    };
 
     const connectSocket = () => {
       socket.connect(port, host, () => {
-        console.log(`✅ Connected to Logstash at ${host}:${port}`);
-        retries = 0; // Reset retry count after successful connection
+        log({
+          level: 'info',
+          proccessName,
+          data: `Connected to Logstash at ${host}:${port}`,
+        });
+        retries = 0;
       });
     };
-
-    socket.on('error', (err) => {
-      console.error(`❌ Logstash TCP error: ${err.message}`);
-      retryConnection();
-    });
-
-    socket.on('close', () => {
-      console.warn('⚠️ Logstash TCP socket closed');
-      retryConnection();
-    });
 
     const retryConnection = () => {
       if (retries < maxRetries) {
         retries++;
         const delay = retryDelay * retries;
-        console.log(`🔁 Retrying to connect to Logstash in ${delay}ms (attempt ${retries}/${maxRetries})`);
+        log({
+          level: 'info',
+          proccessName,
+          data: `Retrying to connect to Logstash in ${delay}ms (attempt ${retries}/${maxRetries})`,
+        });
         setTimeout(() => {
-          socket.destroy(); // Ensure old socket is closed
-          socket = new net.Socket(); // Create new socket for retry
-          attachListeners(); // Reattach listeners
+          // Remove listeners on the old socket before destroying
+          socket.removeAllListeners();
+          socket.destroy();
+
+          // Create a new socket
+          socket = new net.Socket();
+          attachListeners();
           connectSocket();
+
+          // Update the stream in Winston transport
+          this.stream = socket;
         }, delay);
       } else {
-        console.error('🚫 Max retry attempts reached. Giving up on Logstash connection.');
+        log({
+          level: 'error',
+          proccessName,
+          data: `Max retry attempts reached. Giving up on Logstash connection.`,
+        });
       }
     };
 
     const attachListeners = () => {
       socket.on('error', (err) => {
-        console.error(`❌ Logstash TCP error: ${err.message}`);
+        log({
+          level: 'error',
+          proccessName,
+          data: `Logstash TCP error: ${err.message}`,
+        });
         retryConnection();
       });
 
       socket.on('close', () => {
-        console.warn('⚠️ Logstash TCP socket closed');
+        log({
+          level: 'warn',
+          proccessName,
+          data: `Logstash TCP socket closed`,
+        });
         retryConnection();
       });
     };
 
+    attachListeners();
     connectSocket();
 
     super({
@@ -60,6 +85,15 @@ class LogstashTCPTransport extends transports.Stream {
     });
 
     this.socket = socket;
+
+    // 🚨 Catch stream-level errors to avoid crash
+    this.on('error', (err) => {
+      log({
+        level: 'error',
+        proccessName,
+        data: `Winston Stream error: ${err.message}`,
+      });
+    });
   }
 }
 

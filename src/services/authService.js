@@ -2,6 +2,22 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { redisClient } = require('../configs/redis');
+const userRepository = require('../repositories/userRepository');
+
+const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN;
+
+const login = async (username, password, ip, userAgent, loginAt) => {
+  const user = await userRepository.getUserByUsername(username);
+  if (!user || !await comparePassword(password, user.password || '')) {
+      throw new Error('Invalid credentials');
+  }
+
+  const userDetail = await userRepository.getUserById(user.id); 
+  const tokens = await generateTokens(userDetail, ip, userAgent, loginAt);
+  await userRepository.storeRefreshToken(user.id, tokens.refreshToken, JWT_REFRESH_EXPIRES_IN);
+
+  return { tokens };
+};
 
 const comparePassword = async (inputPassword, storedHash) => {
   const normalizedHash = storedHash.replace(/^\$2y\$/, '$2b$');
@@ -49,4 +65,4 @@ const generateTokens = async (user, ip, agent, loginAt) => {
   };
 };
 
-module.exports = { comparePassword, generateTokens };
+module.exports = { login };

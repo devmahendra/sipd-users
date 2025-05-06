@@ -18,7 +18,10 @@ function getLogContext(logObject, now, formatDate) {
     statusCode: logObject.statusCode || store?.get('statusCode') || '   ',
     timestamp: now.toISOString(),
     logTime: formatDate(),
-    data: store?.get('data') || {}
+    data:
+      typeof logObject.data === 'string'
+        ? { message: logObject.data }
+        : logObject.data || store?.get('data') || {}
   }
 
   const systemContext = {

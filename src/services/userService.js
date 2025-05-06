@@ -7,7 +7,7 @@ const getData = async (page, limit, proccessName) => {
         logData({
             level: 'debug',
             proccessName: proccessName,
-            reason: `Success retrieve: ${result.totalRecords} rows.`,
+            data: `Success retrieve: ${result.totalRecords} rows.`,
             statusCode: 200,
         });
       return result;

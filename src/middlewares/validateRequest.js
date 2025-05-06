@@ -15,6 +15,7 @@ const validateRequest = (route) => (req, res, next) => {
         const errors = error.details.map((err) => err.message);
         logData({
           proccessName: processName,
+          data: 'VALIDATION_ERROR ' + errors,
           statusCode: httpCode,
         });
 
@@ -26,11 +27,12 @@ const validateRequest = (route) => (req, res, next) => {
  
     next();
   } catch (error) {
+    console.log(error);
     let httpCode = 500;
 
     logData({
       proccessName: processName,
-      reason: 'INTERNAL_ERROR ' + error.message,
+      data: 'INTERNAL_ERROR ' + error.message,
       statusCode: httpCode,
     });
 

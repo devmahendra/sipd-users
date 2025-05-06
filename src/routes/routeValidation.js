@@ -1,6 +1,6 @@
 const userSchema = require("../schemas/userSchema");
 
 module.exports = {
-    login: userSchema.loginSchema,
-    get_user: userSchema.getDataSchema,
+    LOGIN: userSchema.loginSchema,
+    GET_USER: userSchema.getDataSchema,
 };

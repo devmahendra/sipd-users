@@ -36,6 +36,7 @@ const getRequestToken = async (req, res, next) => {
 
     logData({
       proccessName: processName,
+      data: 'Token validated successfully',
       httpCode: httpCode,
     });
     req.user = JSON.parse(sessionData);

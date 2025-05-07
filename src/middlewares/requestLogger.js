@@ -59,6 +59,7 @@ const requestLogger = (req, res, next) => {
       data.responseHeader = maskSensitive(res.getHeaders() || {});
       store.set('data', data);
       logData({
+        level: 'info',
         proccessName: 'RESPONSE_SENT',
         httpCode: res.statusCode,
       });

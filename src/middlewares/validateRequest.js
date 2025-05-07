@@ -21,7 +21,7 @@ const validateRequest = (route) => (req, res, next) => {
 
         return res.status(httpCode).json(defaultResponse('VALIDATION_ERROR', { errors }, req));
       }
-      logData({ proccessName: processName, httpCode: 200 });
+      logData({ proccessName: processName, data: 'Request validated successfully', httpCode: 200 });
       req.body = value;
     }
  

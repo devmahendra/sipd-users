@@ -42,9 +42,8 @@ const insertData = async (data, proccessName) => {
         });
       return result;
     } catch (error) {
-        const { message, level, httpCode } = handlePostgresError(error);
+        const { message, httpCode } = handlePostgresError(error);
         logData({
-            level,
             proccessName,
             data: `Error inserting user: ${message}`,
             httpCode: httpCode,

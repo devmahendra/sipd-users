@@ -13,22 +13,7 @@ function logMeta(httpCode, level, signal) {
       resolvedLevel = 'info';
       resolvedSignal = 'N';
     }
-  } else {
-    switch (resolvedLevel) {
-      case 'error':
-        resolvedSignal = 'E';
-        break;
-      case 'warn':
-        resolvedSignal = 'W';
-        break;
-      case 'info':
-        resolvedSignal = 'N';
-        break;
-      case 'debug':
-        resolvedSignal = 'D';
-        break;
-    }
-  }
+  } 
 
   return { level: resolvedLevel, signal: resolvedSignal };
 }

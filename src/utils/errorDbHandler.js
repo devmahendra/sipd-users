@@ -22,28 +22,24 @@ const handlePostgresError = (error) => {
       case '23502': // not_null_violation
         return {
             message: `Missing required field: ${error.column || 'unknown'}`,
-            level: 'error',
             httpCode: 400,
         };
   
       case '23503': // foreign_key_violation
         return {
             message: 'Related resource not found (foreign key violation)',
-            level: 'error',
             httpCode: 404,
         };
   
       case '23514': // check_violation
         return {
             message: 'Data validation failed (check constraint violation)',
-            level: 'error',
             httpCode: 422,
         };
   
       default:
         return {
             message: error.message || 'Unhandled database error',
-            level: 'error',
             httpCode: 500,
         };
     }

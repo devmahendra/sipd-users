@@ -16,24 +16,23 @@ const validateRequest = (route) => (req, res, next) => {
         logData({
           proccessName: processName,
           data: 'VALIDATION_ERROR ' + errors,
-          statusCode: httpCode,
+          httpCode: httpCode,
         });
 
         return res.status(httpCode).json(defaultResponse('VALIDATION_ERROR', { errors }, req));
       }
-      logData({ proccessName: processName, statusCode: 200 });
+      logData({ proccessName: processName, httpCode: 200 });
       req.body = value;
     }
  
     next();
   } catch (error) {
-    console.log(error);
     let httpCode = 500;
 
     logData({
       proccessName: processName,
       data: 'INTERNAL_ERROR ' + error.message,
-      statusCode: httpCode,
+      httpCode: httpCode,
     });
 
     return res.status(httpCode).json(defaultResponse('INTERNAL_ERROR', { error: error.message }, req));

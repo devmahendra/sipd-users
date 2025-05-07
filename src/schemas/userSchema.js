@@ -9,3 +9,7 @@ exports.getDataSchema = Joi.object({
     page: Joi.number().integer().min(1).optional(),
     limit: Joi.number().integer().min(1).optional(),
 });
+
+exports.createDataSchema = Joi.object({
+    username: Joi.string().required(),
+});

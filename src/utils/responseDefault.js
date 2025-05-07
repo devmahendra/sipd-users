@@ -5,7 +5,7 @@ const responseDefault = (responseType, data = null, req = null) => {
 
   if (!response) {
     return {
-      responseCode: "5000000",
+      responseCode: "5000099",
       responseMessage: "Unknown response type"
     };
   }

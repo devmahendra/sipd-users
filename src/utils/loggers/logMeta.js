@@ -1,17 +1,33 @@
-function logMeta(statusCode, level, signal) {
+function logMeta(httpCode, level, signal) {
   let resolvedLevel = level;
   let resolvedSignal = signal;
 
   if (!resolvedLevel) {
-    if (statusCode === 500) {
-      resolvedLevel = 'error',
+    if (httpCode === 500) {
+      resolvedLevel = 'error';
       resolvedSignal = 'E';
-    }
-    else if (statusCode !== 200 && statusCode !== '   ' && signal !== 'S') {
-      resolvedLevel = 'warn',
+    } else if (httpCode !== 200 && httpCode !== '   ' && httpCode !== '-') {
+      resolvedLevel = 'warn';
       resolvedSignal = 'W';
+    } else {
+      resolvedLevel = 'info';
+      resolvedSignal = 'N';
     }
-    else resolvedLevel = 'info';
+  } else {
+    switch (resolvedLevel) {
+      case 'error':
+        resolvedSignal = 'E';
+        break;
+      case 'warn':
+        resolvedSignal = 'W';
+        break;
+      case 'info':
+        resolvedSignal = 'N';
+        break;
+      case 'debug':
+        resolvedSignal = 'D';
+        break;
+    }
   }
 
   return { level: resolvedLevel, signal: resolvedSignal };

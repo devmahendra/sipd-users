@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { redisClient } = require('../configs/redis');
+const { comparePassword } = require('../helpers/password');
 const userRepository = require('../repositories/userRepository');
 
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN;
@@ -17,11 +18,6 @@ const login = async (username, password, ip, userAgent, loginAt) => {
   await userRepository.storeRefreshToken(user.id, tokens.refreshToken, JWT_REFRESH_EXPIRES_IN);
 
   return { tokens };
-};
-
-const comparePassword = async (inputPassword, storedHash) => {
-  const normalizedHash = storedHash.replace(/^\$2y\$/, '$2b$');
-  return bcrypt.compare(inputPassword, normalizedHash);
 };
 
 const buildTokenPayload = (user, ip, agent, loginAt) => {

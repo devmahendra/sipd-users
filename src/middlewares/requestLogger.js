@@ -55,14 +55,12 @@ const requestLogger = (req, res, next) => {
     const store = asyncLocalStorage.getStore();
     if (store) {
       store.set('signal', 'S');
-
       const data = store.get('data') || {};
       data.responseHeader = maskSensitive(res.getHeaders() || {});
       store.set('data', data);
       logData({
-        level: 'info',
         proccessName: 'RESPONSE_SENT',
-        statusCode: res.statusCode,
+        httpCode: res.statusCode,
       });
     }
   });

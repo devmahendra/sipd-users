@@ -6,13 +6,15 @@ const { logData } = require('../utils/loggers');
 const getRequestToken = async (req, res, next) => {
   const token = req.cookies.accessToken;
   let processName = 'VALIDATE_TOKEN'
+  let httpCode = 200;
 
   if (!token) {
     let httpCode = 400;
 
     logData({
       proccessName: processName,
-      statusCode: httpCode,
+      data: 'Token not found',
+      httpCode: httpCode
     });
     return res.status(httpCode).json(responseDefault('MISSING_FIELDS', 'Token not found', req));
   }
@@ -26,11 +28,16 @@ const getRequestToken = async (req, res, next) => {
 
       logData({
         proccessName: processName,
-        statusCode: httpCode,
+        data: 'Unauthorized',
+        httpCode: httpCode,
       });
       return res.status(httpCode).json(responseDefault('UNAUTHORIZED', 'Unauthorized', req));
     }
 
+    logData({
+      proccessName: processName,
+      httpCode: httpCode,
+    });
     req.user = JSON.parse(sessionData);
 
     next();
@@ -39,8 +46,8 @@ const getRequestToken = async (req, res, next) => {
 
     logData({
       proccessName: processName,
-      reason: 'INTERNAL_ERROR ' + error.message,
-      statusCode: httpCode,
+      data: 'INTERNAL_ERROR ' + error.message,
+      httpCode: httpCode,
     });
     res.status(httpCode).json(responseDefault('INTERNAL_ERROR', null, req));
   }

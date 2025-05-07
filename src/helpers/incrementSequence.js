@@ -11,7 +11,6 @@ const incrementSequence = (level) => {
     const store = asyncLocalStorage.getStore();
     if (store) {
       const currentSeq = store.get('sequence') || 1;
-      store.set('signal', 'N');
       store.set('sequence', currentSeq + 1);
     }
   }

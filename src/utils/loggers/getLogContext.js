@@ -15,7 +15,7 @@ function getLogContext(logObject, now, formatDate) {
     method: addPadding(store?.get('method'), 10) || 'N/A',
     path: addPadding(store?.get('path'), 50) || 'N/A',
     proccessName: addPadding(logObject.proccessName, 25) || '',
-    statusCode: logObject.statusCode || store?.get('statusCode') || '   ',
+    httpCode: logObject.httpCode || store?.get('httpCode') || '   ',
     timestamp: now.toISOString(),
     logTime: formatDate(),
     data:
@@ -33,7 +33,7 @@ function getLogContext(logObject, now, formatDate) {
     method: addPadding('N/A', 10),
     path: addPadding('N/A', 50),
     proccessName: addPadding(logObject.proccessName, 25) || '',
-    statusCode: addPadding('', 3),
+    httpCode: addPadding('', 3),
     timestamp: now.toISOString(),
     logTime: formatDate(),
     data:

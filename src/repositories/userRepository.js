@@ -104,4 +104,17 @@ const getData = async (page, limit) => {
   }
 };
 
-module.exports = { getUserByUsername, getUserById, storeRefreshToken, getData };
+const insertData = async ({ username, password, createdBy }) => {
+  const query = `
+    INSERT INTO users (username, password, created_by)
+    VALUES ($1, $2, $3)
+    RETURNING id, username, created_at;
+  `;
+  const values = [username, password, createdBy];
+
+  const result = await pool.query(query, values);
+  return result.rows[0];
+};
+
+
+module.exports = { getUserByUsername, getUserById, storeRefreshToken, getData, insertData };

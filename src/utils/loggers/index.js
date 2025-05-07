@@ -10,17 +10,14 @@ const logData = (logObject, mode = 1) => {
   const now = new Date();
   const context = getLogContext(logObject, now, formatDate);
   incrementSequence(logObject.level);
-  const { level, signal } = logMeta(context.statusCode, logObject.level, context.signal);
-  
+  const { level, signal } = logMeta(context.httpCode, logObject.level, context.signal);
   context.level = level;
   context.signal = signal;
-  
   if (logObject.reason?.trim()) {
     context.reason = logObject.reason.trim();
   }
   
   const message = buildLogMessage(context);
-
   mainLogger.log({
     appName: process.env.APP_NAME,
     level,

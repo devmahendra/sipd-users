@@ -5,4 +5,5 @@ module.exports = {
     GET_USER: userSchema.getDataSchema,
     CREATE_USER: userSchema.createDataSchema,
     UPDATE_USER: userSchema.updateDataSchema,
+    DELETE_USER: userSchema.deleteDataSchema,
 };

@@ -2,39 +2,45 @@ const defaultResponse = require("../utils/responseDefault");
 const { logData } = require('../utils/loggers');
 
 const validateRequest = (route) => (req, res, next) => {
-  let processName = 'VALIDATE_REQUEST'
+  const processName = 'VALIDATE_REQUEST';
+  req.serviceCode = route.id;
+
   try {
-    req.serviceCode = route.id;
+    if (!route.validation) return next();
 
-    if (route.validation) {
-      const { error, value } = route.validation.validate(req.body, { abortEarly: false });
-
-      if (error) {
-        let httpCode = 400;
-
-        const errors = error.details.map((err) => err.message);
-        logData({
-          proccessName: processName,
-          data: 'VALIDATION_ERROR ' + errors,
-          httpCode: httpCode,
-        });
-
-        return res.status(httpCode).json(defaultResponse('VALIDATION_ERROR', { errors }, req));
+    // Support different validation sources
+    const sources = ['body', 'query', 'params'];
+    for (const source of sources) {
+      if (route.validation[source]) {
+        const { error, value } = route.validation[source].validate(req[source], { abortEarly: false });
+        if (error) {
+          const httpCode = 400;
+          const errors = error.details.map((err) => err.message);
+          logData({
+            proccessName: processName,
+            data: `VALIDATION_ERROR (${source}) ` + errors,
+            httpCode,
+          });
+          return res.status(httpCode).json(defaultResponse('VALIDATION_ERROR', { errors }, req));
+        }
+        req[source] = value;
       }
-      logData({ proccessName: processName, data: 'Request validated successfully', httpCode: 200 });
-      req.body = value;
     }
- 
-    next();
-  } catch (error) {
-    let httpCode = 500;
 
     logData({
       proccessName: processName,
-      data: 'INTERNAL_ERROR ' + error.message,
-      httpCode: httpCode,
+      data: 'Request validated successfully',
+      httpCode: 200,
     });
+    next();
 
+  } catch (error) {
+    const httpCode = 500;
+    logData({
+      proccessName: processName,
+      data: 'INTERNAL_ERROR ' + error.message,
+      httpCode,
+    });
     return res.status(httpCode).json(defaultResponse('INTERNAL_ERROR', { error: error.message }, req));
   }
 };

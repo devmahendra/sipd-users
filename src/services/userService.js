@@ -56,7 +56,6 @@ const insertData = async (data, proccessName) => {
 const updateData = async (data, proccessName) => {
     try {
         const result = await userRepository.updateData(data);
-
         logData({
             level: 'debug',
             proccessName: proccessName,
@@ -68,7 +67,7 @@ const updateData = async (data, proccessName) => {
         const { message, httpCode } = handlePostgresError(error);
         logData({
             proccessName,
-            data: `Error inserting user: ${message}`,
+            data: `Error inserting data: ${message}`,
             httpCode: httpCode,
         });
         error.message = message;
@@ -77,4 +76,27 @@ const updateData = async (data, proccessName) => {
     }
 }
 
-module.exports = { getData, insertData, updateData };
+const deleteData = async (data, proccessName) => {
+    try {
+        const result = await userRepository.deleteData(data);
+        logData({
+            level: 'debug',
+            proccessName: proccessName,
+            data: `Success delete data with id: ${result.id}`,
+            httpCode: 200,
+        });
+      return result;
+    } catch (error) {
+        const { message, httpCode } = handlePostgresError(error);
+        logData({
+            proccessName,
+            data: `Error deleting data: ${message}`,
+            httpCode: httpCode,
+        });
+        error.message = message;
+        error.httpCode = httpCode;
+        throw error;
+    }
+}
+
+module.exports = { getData, insertData, updateData, deleteData };

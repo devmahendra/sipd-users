@@ -58,4 +58,20 @@ const updateData = async (req, res) => {
   }
 }
 
-module.exports = { getData, insertData, updateData };
+const deleteData = async (req, res) => {
+  let proccessName = req.routeConfig.name;
+  
+  if (!checkPermission(req, res, 'd')) return;
+  const id = parseInt(req.params.id);
+  const deletedAt = new Date();
+  const deletedBy = req.user?.id;
+
+  try {
+    await userService.deleteData({ id, deletedAt, deletedBy }, proccessName);
+    handleSuccess(res, req, 200, "data deleted successfully");
+  } catch (error) {
+    handleError(res, req, error);
+  }
+}
+
+module.exports = { getData, insertData, updateData, deleteData };

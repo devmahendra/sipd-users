@@ -5,6 +5,7 @@ const logMeta = require('./logMeta');
 const buildLogMessage = require('./buildLogMessage');
 const { formatDate } = require('../../helpers/dateFormatter');
 const { incrementSequence } = require('../../helpers/incrementSequence');
+const { log } = require('winston');
 
 const logData = (logObject, mode = 1) => {
   const now = new Date();

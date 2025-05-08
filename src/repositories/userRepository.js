@@ -93,8 +93,6 @@ const getData = async (page, limit) => {
     const { rows } = await pool.query(countQuery);
     const totalRecords = parseInt(rows[0].count);
 
-    console.log(data)
-
     return {
       totalRecords,
       totalPages: Math.ceil(totalRecords / limit),
@@ -176,6 +174,31 @@ const updateData = async ({ id, first_name, last_name, email, phone_number, upda
   }
 };
 
+const deleteData = async ({ id, deletedAt, deletedBy }) => {
+  const client = await pool.connect();
+  
+  try {
+    await client.query('BEGIN');
+
+    const deleteUserQuery = `
+      UPDATE users
+      SET deleted_at = $2, deleted_by = $3
+      WHERE id = $1
+      RETURNING id;
+    `;
+    await client.query(deleteUserQuery, [id, deletedAt, deletedBy]);
+
+    await client.query('COMMIT');
+
+    return deleteUserQuery;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+};
 
 
-module.exports = { getUserByUsername, getUserById, storeRefreshToken, getData, insertData, updateData };
+
+module.exports = { getUserByUsername, getUserById, storeRefreshToken, getData, insertData, updateData, deleteData };

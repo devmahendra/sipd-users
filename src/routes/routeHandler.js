@@ -6,4 +6,5 @@ module.exports = {
     GET_USER: userController.getData,
     CREATE_USER: userController.insertData,
     UPDATE_USER: userController.updateData,
+    DELETE_USER: userController.deleteData,
 };

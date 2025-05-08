@@ -2,7 +2,7 @@ function logMeta(httpCode, level, signal) {
   let resolvedLevel = level;
   let resolvedSignal = signal;
 
-  if (!resolvedLevel) {
+  if (!resolvedLevel || resolvedLevel === 'debug') {
     if (httpCode === 500) {
       resolvedLevel = 'error';
       resolvedSignal = 'E';

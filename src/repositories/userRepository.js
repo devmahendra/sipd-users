@@ -86,12 +86,14 @@ const getData = async (page, limit) => {
       ORDER BY u.created_at DESC
       LIMIT $1 OFFSET $2
     `;
-
+    
     const countQuery = `SELECT COUNT(*) FROM users WHERE deleted_at IS NULL`;
 
     const { rows: data } = await pool.query(dataQuery, values);
     const { rows } = await pool.query(countQuery);
     const totalRecords = parseInt(rows[0].count);
+
+    console.log(data)
 
     return {
       totalRecords,
@@ -104,17 +106,76 @@ const getData = async (page, limit) => {
   }
 };
 
-const insertData = async ({ username, password, createdBy }) => {
-  const query = `
-    INSERT INTO users (username, password, created_by)
-    VALUES ($1, $2, $3)
-    RETURNING id, username, created_at;
-  `;
-  const values = [username, password, createdBy];
+const insertData = async ({ username, password, createdBy, firstName, lastName, email, phoneNumber }) => {
+  const client = await pool.connect();
 
-  const result = await pool.query(query, values);
-  return result.rows[0];
+  try {
+    await client.query('BEGIN');
+
+    const insertUserQuery = `
+      INSERT INTO users (username, password, created_by)
+      VALUES ($1, $2, $3)
+      RETURNING id, username, created_at;
+    `;
+    const userValues = [username, password, createdBy];
+    const userResult = await client.query(insertUserQuery, userValues);
+    const user = userResult.rows[0];
+
+    const insertProfileQuery = `
+      INSERT INTO user_profile (user_id, first_name, last_name, email, phone_number)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id, user_id, first_name, last_name, email, phone_number;
+    `;
+    const profileValues = [user.id, firstName, lastName, email, phoneNumber];
+    const profileResult = await client.query(insertProfileQuery, profileValues);
+
+    await client.query('COMMIT');
+
+    return profileResult.rows[0];
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+const updateData = async ({ id, first_name, last_name, email, phone_number, updatedBy }) => {
+  const client = await pool.connect();
+  
+  try {
+    await client.query('BEGIN');
+
+    const updateUserQuery = `
+      UPDATE users
+      SET updated_by = $1
+      WHERE id = $2
+      RETURNING updated_at;
+    `;
+    await client.query(updateUserQuery, [updatedBy, id]);
+
+    const updateProfileQuery = `
+      UPDATE user_profile
+      SET first_name = $1,
+          last_name = $2,
+          email = $3,
+          phone_number = $4
+      WHERE user_id = $5
+      RETURNING id, first_name, last_name, email, phone_number;
+    `;
+    const profileResult = await client.query(updateProfileQuery, [first_name, last_name, email, phone_number, id]);
+
+    await client.query('COMMIT');
+
+    return profileResult.rows[0];
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
 };
 
 
-module.exports = { getUserByUsername, getUserById, storeRefreshToken, getData, insertData };
+
+module.exports = { getUserByUsername, getUserById, storeRefreshToken, getData, insertData, updateData };

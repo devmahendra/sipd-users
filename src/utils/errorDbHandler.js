@@ -12,7 +12,7 @@ const handlePostgresError = (error) => {
           case 'users_username_key':
             message = 'Username already exists';
             break;
-          case 'users_email_key':
+          case 'user_profile_email_key':
             message = 'Email already exists';
             break;
         }

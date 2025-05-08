@@ -1,7 +1,19 @@
 function buildLogMessage(context) {
-    let msg = `reqId: ${context.requestId} seq: ${context.sequence} proccessName:${context.proccessName} signal:${context.signal} device:${context.device} ip:${context.ip} path:${context.method} ${context.path} httpCode:${context.httpCode}`;
-    if (context.data) msg += ` data:${JSON.stringify(context.data)}`;
-    return msg;
+  const parts = [];
+
+  if (context.requestId) parts.push(`reqId:${context.requestId}`);
+  if (context.sequence) parts.push(`seq:${context.sequence}`);
+  if (context.proccessName) parts.push(`proccessName:${context.proccessName}`);
+  if (context.signal) parts.push(`signal:${context.signal}`);
+  if (context.device) parts.push(`device:${context.device}`);
+  if (context.ip) parts.push(`ip:${context.ip}`);
+  if (context.method || context.path) {
+    parts.push(`path:${context.method || ''} ${context.path || ''}`.trim());
   }
-  
-  module.exports = buildLogMessage;  
+  if (context.httpCode !== undefined) parts.push(`httpCode:${context.httpCode}`);
+  if (context.data) parts.push(`data:${JSON.stringify(context.data)}`);
+
+  return parts.join(' ');
+}
+
+module.exports = buildLogMessage;

@@ -29,17 +29,33 @@ const getData = async (req, res) => {
 const insertData = async (req, res) => {
   let proccessName = req.routeConfig.name;
 
-  if (!checkPermission(req, res, 'r')) return;
+  if (!checkPermission(req, res, 'c')) return;
 
-  const { username } = req.body;
+  const { username, firstName, lastName, email, phoneNumber } = req.body;
   const createdBy = req.user?.id;
 
   try {
-    await userService.insertData({ username, createdBy }, proccessName);
+    await userService.insertData({ username, firstName, lastName, email, phoneNumber, createdBy }, proccessName);
     handleSuccess(res, req, 200, "data created successfully");
   } catch (error) {
     handleError(res, req, error);
   }
 }
 
-module.exports = { getData, insertData };
+const updateData = async (req, res) => {
+  let proccessName = req.routeConfig.name;
+
+  if (!checkPermission(req, res, 'u')) return;
+  const id = parseInt(req.params.id);
+  const { firstName, lastName, email, phoneNumber } = req.body;
+  const updatedBy = req.user?.id;
+
+  try {
+    await userService.updateData({ id, firstName, lastName, email, phoneNumber, updatedBy }, proccessName);
+    handleSuccess(res, req, 200, "data updated successfully");
+  } catch (error) {
+    handleError(res, req, error);
+  }
+}
+
+module.exports = { getData, insertData, updateData };

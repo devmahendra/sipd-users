@@ -11,5 +11,16 @@ exports.getDataSchema = Joi.object({
 });
 
 exports.createDataSchema = Joi.object({
-    username: Joi.string().required(),
+    username: Joi.string().min(1).max(50).required(),
+    firstName: Joi.string().min(1).max(100).required(),
+    lastName:  Joi.string().min(1).max(100).required(),
+    email: Joi.string().email().min(1).max(100).required(),
+    phone_number: Joi.string().pattern(/^[0-9]+$/).allow('').max(20).optional(),
+});
+
+exports.updateDataSchema = Joi.object({
+    firstName: Joi.string().min(1).max(100).allow('').optional(),
+    lastName:  Joi.string().min(1).max(100).allow('').optional(),
+    email: Joi.string().email().min(1).max(100).optional(),
+    phone_number: Joi.string().pattern(/^[0-9]+$/).allow('').max(20).optional(),
 });

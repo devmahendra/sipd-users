@@ -25,15 +25,7 @@ function getLogContext(logObject, now, formatDate) {
   }
 
   const systemContext = {
-    requestId: addPadding('N/A', 36),
-    sequence: 0,
-    device: addPadding('SYS', 5),
-    signal: 'N',
-    ip: addPadding('N/A', 15),
-    method: addPadding('N/A', 10),
-    path: addPadding('N/A', 50),
     proccessName: addPadding(logObject.proccessName, 25) || addPadding('', 25),
-    httpCode: addPadding('', 3),
     timestamp: now.toISOString(),
     logTime: formatDate(),
     data:

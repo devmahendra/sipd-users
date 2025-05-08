@@ -36,7 +36,7 @@ const insertData = async (data, proccessName) => {
         logData({
             level: 'debug',
             proccessName: proccessName,
-            data: `Success write data with id: ${result.id} at: ${result.created_at}.`,
+            data: `Success write data with id: ${result.id}`,
             httpCode: 200,
         });
       return result;
@@ -53,4 +53,28 @@ const insertData = async (data, proccessName) => {
     }
 }
 
-module.exports = { getData, insertData };
+const updateData = async (data, proccessName) => {
+    try {
+        const result = await userRepository.updateData(data);
+
+        logData({
+            level: 'debug',
+            proccessName: proccessName,
+            data: `Success update data with id: ${result.id}`,
+            httpCode: 200,
+        });
+      return result;
+    } catch (error) {
+        const { message, httpCode } = handlePostgresError(error);
+        logData({
+            proccessName,
+            data: `Error inserting user: ${message}`,
+            httpCode: httpCode,
+        });
+        error.message = message;
+        error.httpCode = httpCode;
+        throw error;
+    }
+}
+
+module.exports = { getData, insertData, updateData };

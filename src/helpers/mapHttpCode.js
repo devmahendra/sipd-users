@@ -9,7 +9,7 @@ const mapHttpCode = (httpCode) => {
   const entry = Object.entries(responseCodes).find(
     ([, value]) => value.HTTP_CODE === httpCode
   );
-  return entry ? entry[0] : 'INTERNAL_ERROR'; // fallback to internal error
+  return entry ? entry[0] : 'INTERNAL_ERROR'; 
 };
 
 module.exports = mapHttpCode;

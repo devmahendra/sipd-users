@@ -1,16 +1,23 @@
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { redisClient } = require('../configs/redis');
 const { comparePassword } = require('../helpers/password');
 const userRepository = require('../repositories/userRepository');
+const { logData } = require('../utils/loggers');
+const { HttpError } = require('../utils/errorHandler');
 
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN;
 
-const login = async (username, password, ip, userAgent, loginAt) => {
+const login = async (username, password, ip, userAgent, loginAt, proccessName) => {
   const user = await userRepository.getUserByUsername(username);
   if (!user || !await comparePassword(password, user.password || '')) {
-      throw new Error('Invalid credentials');
+        logData({
+          level: 'warn',
+          proccessName: proccessName,
+          data: `Invalid credentials.`,
+          httpCode: 401,
+      });
+      throw new HttpError('Invalid credentials', 401);
   }
 
   const userDetail = await userRepository.getUserById(user.id); 

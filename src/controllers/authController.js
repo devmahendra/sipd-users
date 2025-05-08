@@ -1,13 +1,15 @@
 const authService = require('../services/authService');
-const defaultResponse = require('../utils/responseDefault');
+const { handleSuccess } = require('../utils/responseHandler');
+const { handleError } = require('../utils/errorHandler');
 
 const login = async (req, res) => {
+    let proccessName = req.routeConfig.name;
     const { username, password } = req.body;
     const ip = req.ip || req.socket.remoteAddress
     const userAgent = req.headers['user-agent'] || 'unknown';
     const loginAt = new Date();
     try {
-        const result = await authService.login(username, password, ip, userAgent, loginAt);
+        const result = await authService.login(username, password, ip, userAgent, loginAt, proccessName);
         if (res.status(200)) {
             res.cookie('accessToken', result.tokens.accessToken, {
                 httpOnly: true,
@@ -23,9 +25,9 @@ const login = async (req, res) => {
                 sameSite: 'None',
             });
         }
-        res.status(200).json(defaultResponse("SUCCESS", null, req));
+        handleSuccess(res, req, 200, null);
     } catch (error) {
-        res.status(500).json(defaultResponse("INTERNAL_ERROR", { error: error.message }, req));
+        handleError(res, req, error);
     }
 };
 

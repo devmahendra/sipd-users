@@ -13,9 +13,6 @@ const logData = (logObject, mode = 1) => {
   const { level, signal } = logMeta(context.httpCode, logObject.level, context.signal);
   context.level = level;
   context.signal = signal;
-  if (logObject.reason?.trim()) {
-    context.reason = logObject.reason.trim();
-  }
   
   const message = buildLogMessage(context);
   mainLogger.log({

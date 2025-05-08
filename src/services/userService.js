@@ -1,4 +1,3 @@
-const bcrypt = require('bcrypt');
 const userRepository = require('../repositories/userRepository');
 const { logData } = require('../utils/loggers');
 const { randomPassword, hashedPassword } = require('../helpers/password');
@@ -13,7 +12,7 @@ const getData = async (page, limit, proccessName) => {
             data: `Success retrieve: ${result.totalRecords} rows.`,
             httpCode: 200,
         });
-      return result;
+        return result;
     } catch (error) {
         logData({
             level: 'error',

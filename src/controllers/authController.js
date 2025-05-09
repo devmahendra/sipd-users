@@ -3,13 +3,12 @@ const { handleSuccess } = require('../utils/responseHandler');
 const { handleError } = require('../utils/errorHandler');
 
 const login = async (req, res) => {
-    let proccessName = req.routeConfig.name;
     const { username, password } = req.body;
     const ip = req.ip || req.socket.remoteAddress
     const userAgent = req.headers['user-agent'] || 'unknown';
     const loginAt = new Date();
     try {
-        const result = await authService.login(username, password, ip, userAgent, loginAt, proccessName);
+        const result = await authService.login(username, password, ip, userAgent, loginAt);
         if (res.status(200)) {
             res.cookie('accessToken', result.tokens.accessToken, {
                 httpOnly: true,

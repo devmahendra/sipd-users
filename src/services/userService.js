@@ -1,98 +1,85 @@
+const pool = require('../configs/db');
 const userRepository = require('../repositories/userRepository');
-const { logData } = require('../utils/loggers');
 const { randomPassword, hashedPassword } = require('../helpers/password');
 const { handlePostgresError } = require('../utils/errorDbHandler');
 
-const getData = async (page, limit, proccessName) => {
+const getData = async (page, limit) => {
     try {
         const result = await userRepository.getData(page, limit);
-        logData({
-            level: 'debug',
-            proccessName: proccessName,
-            data: `Success retrieve: ${result.totalRecords} rows.`,
-            httpCode: 200,
-        });
         return result;
     } catch (error) {
-        logData({
-            level: 'error',
-            proccessName: proccessName,
-            data: `Failed retrieve data with error: ${error.message}.`,
-            httpCode: 500,
-        });
         throw error;
     }
 };
 
-const insertData = async (data, proccessName) => {
+const insertData = async (data) => {
     try {
+        await pool.query('BEGIN');
         const password = randomPassword();
         const hashedPass = await hashedPassword(password);
+        const roleId = data.roleId;
 
-        const result = await userRepository.insertData({
+        const result = await userRepository.insertUser(pool, { 
             ...data,
             password: hashedPass,
         });
-        logData({
-            level: 'debug',
-            proccessName: proccessName,
-            data: `Success write data with id: ${result.id}`,
-            httpCode: 200,
+
+        await userRepository.insertUserProfile(pool, {
+            ...data,
+            userId: result.id,
         });
-      return result;
+
+        if (roleId) {
+            await userRepository.insertUserRole(pool, { userId: result.id, roleId: roleId });
+        }
+        
+        await pool.query('COMMIT');
+        return result;
     } catch (error) {
         const { message, httpCode } = handlePostgresError(error);
-        logData({
-            proccessName,
-            data: `Error inserting user: ${message}`,
-            httpCode: httpCode,
-        });
         error.message = message;
         error.httpCode = httpCode;
         throw error;
     }
 }
 
-const updateData = async (data, proccessName) => {
+const updateData = async (data) => {
     try {
-        const result = await userRepository.updateData(data);
-        logData({
-            level: 'debug',
-            proccessName: proccessName,
-            data: `Success update data with id: ${result.id}`,
-            httpCode: 200,
+        await pool.query('BEGIN');
+        const roleId = data.roleId;
+        const password = data.password;
+        const hashedPass = await hashedPassword(password);
+
+        const result = await userRepository.updateUser(pool, { 
+            ...data,
+            password: hashedPass,
         });
-      return result;
+
+        await userRepository.updateUserProfile(pool, {
+            ...data,
+            userId: result.id,
+        });
+
+        if (roleId) {
+            await userRepository.updateUserRole(pool, { userId: result.id, roleId: roleId });
+        }
+        
+        await pool.query('COMMIT');
+        return result;
     } catch (error) {
         const { message, httpCode } = handlePostgresError(error);
-        logData({
-            proccessName,
-            data: `Error inserting data: ${message}`,
-            httpCode: httpCode,
-        });
         error.message = message;
         error.httpCode = httpCode;
         throw error;
     }
 }
 
-const deleteData = async (data, proccessName) => {
+const deleteData = async (data) => {
     try {
         const result = await userRepository.deleteData(data);
-        logData({
-            level: 'debug',
-            proccessName: proccessName,
-            data: `Success delete data with id: ${result.id}`,
-            httpCode: 200,
-        });
       return result;
     } catch (error) {
         const { message, httpCode } = handlePostgresError(error);
-        logData({
-            proccessName,
-            data: `Error deleting data: ${message}`,
-            httpCode: httpCode,
-        });
         error.message = message;
         error.httpCode = httpCode;
         throw error;

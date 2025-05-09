@@ -20,7 +20,8 @@ exports.createDataSchema = {
     firstName: Joi.string().min(1).max(100).required(),
     lastName: Joi.string().min(1).max(100).required(),
     email: Joi.string().email().min(1).max(100).required(),
-    phone_number: Joi.string().pattern(/^[0-9]+$/).allow('').max(20).optional(),
+    phoneNumber: Joi.string().pattern(/^[0-9]+$/).allow('').max(20).optional(),
+    roleId: Joi.number().integer().min(1).optional(),
   }),
 };
 
@@ -29,10 +30,12 @@ exports.updateDataSchema = {
     id: Joi.number().integer().min(1).required(),
   }),
   body: Joi.object({
+    password: Joi.string().required(),
     firstName: Joi.string().min(1).max(100).allow('').optional(),
     lastName: Joi.string().min(1).max(100).allow('').optional(),
     email: Joi.string().email().min(1).max(100).optional(),
-    phone_number: Joi.string().pattern(/^[0-9]+$/).allow('').max(20).optional(),
+    phoneNumber: Joi.string().pattern(/^[0-9]+$/).allow('').max(20).optional(),
+    roleId: Joi.number().integer().min(1).optional(),
   }),
 };
 

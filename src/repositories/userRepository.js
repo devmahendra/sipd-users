@@ -104,74 +104,77 @@ const getData = async (page, limit) => {
   }
 };
 
-const insertData = async ({ username, password, createdBy, firstName, lastName, email, phoneNumber }) => {
-  const client = await pool.connect();
-
-  try {
-    await client.query('BEGIN');
-
-    const insertUserQuery = `
-      INSERT INTO users (username, password, created_by)
-      VALUES ($1, $2, $3)
-      RETURNING id, username, created_at;
-    `;
-    const userValues = [username, password, createdBy];
-    const userResult = await client.query(insertUserQuery, userValues);
-    const user = userResult.rows[0];
-
-    const insertProfileQuery = `
-      INSERT INTO user_profile (user_id, first_name, last_name, email, phone_number)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING id, user_id, first_name, last_name, email, phone_number;
-    `;
-    const profileValues = [user.id, firstName, lastName, email, phoneNumber];
-    const profileResult = await client.query(insertProfileQuery, profileValues);
-
-    await client.query('COMMIT');
-
-    return profileResult.rows[0];
-  } catch (error) {
-    await client.query('ROLLBACK');
-    throw error;
-  } finally {
-    client.release();
-  }
+const insertUser = async (client, { username, password, createdBy }) => {
+  const query = `
+    INSERT INTO users (username, password, created_by)
+    VALUES ($1, $2, $3)
+    RETURNING id, username, created_at;
+  `;
+  const values = [username, password, createdBy];
+  const result = await client.query(query, values);
+  return result.rows[0];
 };
 
-const updateData = async ({ id, first_name, last_name, email, phone_number, updatedBy }) => {
-  const client = await pool.connect();
-  
-  try {
-    await client.query('BEGIN');
+const insertUserProfile = async (client, { userId, firstName, lastName, email, phoneNumber }) => {
+  const query = `
+    INSERT INTO user_profile (user_id, first_name, last_name, email, phone_number)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING id, user_id, first_name, last_name, email, phone_number;
+  `;
+  const values = [userId, firstName, lastName, email, phoneNumber];
+  const result = await client.query(query, values);
+  return result.rows[0];
+};
 
-    const updateUserQuery = `
-      UPDATE users
-      SET updated_by = $1
-      WHERE id = $2
-      RETURNING updated_at;
-    `;
-    await client.query(updateUserQuery, [updatedBy, id]);
+const insertUserRole = async (client, { userId, roleId }) => {
+  const query = `
+    INSERT INTO user_roles (user_id, role_id)
+    VALUES ($1, $2)
+    ON CONFLICT (user_id, role_id) DO NOTHING
+    RETURNING *;
+  `;
+  const values = [userId, roleId];
+  const result = await client.query(query, values);
+  return result.rows[0];
+};
 
-    const updateProfileQuery = `
-      UPDATE user_profile
-      SET first_name = $1,
-          last_name = $2,
-          email = $3,
-          phone_number = $4
-      WHERE user_id = $5
-      RETURNING id, first_name, last_name, email, phone_number;
-    `;
-    const profileResult = await client.query(updateProfileQuery, [first_name, last_name, email, phone_number, id]);
+const updateUser = async (client, { id, password, updatedBy }) => {
+  const query = `
+    UPDATE users
+    SET password = $2, updated_by = $3
+    WHERE id = $1
+    RETURNING id, updated_at;
+  `;
+  const values = [id, password, updatedBy];
+  const result = await client.query(query, values);
+  return result.rows[0];
+};
 
-    await client.query('COMMIT');
+const updateUserProfile = async (client, { userId, firstName, lastName, email, phoneNumber }) => {
+  const query = `
+    UPDATE user_profile
+    SET first_name = $2,
+        last_name = $3,
+        email = $4,
+        phone_number = $5
+    WHERE user_id = $1
+    RETURNING id;
+  `;
+  const values = [userId, firstName, lastName, email, phoneNumber];
+  const result = await client.query(query, values);
+  return result.rows[0];
+};
 
-    return profileResult.rows[0];
-  } catch (error) {
-    await client.query('ROLLBACK');
-    throw error;
-  } finally {
-    client.release();
-  }
+const updateUserRole = async (client, { userId, roleId }) => {
+  const query = `
+    UPDATE user_roles
+    SET role_id = $2
+    WHERE user_id = $1
+    RETURNING *;
+  `;
+  const values = [userId, roleId];
+  const result = await client.query(query, values);
+  return result.rows[0];
 };
 
 const deleteData = async ({ id, deletedAt, deletedBy }) => {
@@ -201,4 +204,16 @@ const deleteData = async ({ id, deletedAt, deletedBy }) => {
 
 
 
-module.exports = { getUserByUsername, getUserById, storeRefreshToken, getData, insertData, updateData, deleteData };
+module.exports = { 
+  getUserByUsername, 
+  getUserById, 
+  storeRefreshToken, 
+  getData, 
+  insertUser, 
+  insertUserProfile,
+  insertUserRole,
+  updateUser,
+  updateUserProfile,
+  updateUserRole,
+  deleteData 
+};

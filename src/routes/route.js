@@ -29,8 +29,9 @@ module.exports = async function initializeRoutes(app) {
       route.validation = validationMap[route.name];
       middlewares.push(validateRequest(route)); 
     }
-    
+  
     const handler = handlerMap[route.name];
+
     if (!handler) {
       console.warn(`No handler for route ${route.name}`);
       return;

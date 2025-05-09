@@ -1,4 +1,4 @@
-const userService = require('../services/userService');
+const userRoleService = require('../services/userRoleService');
 const checkPermission = require('../utils/checkPermission');
 const getPaginationParams = require('../helpers/pagination');
 const { handleSuccess } = require('../utils/responseHandler');
@@ -10,7 +10,7 @@ const getData = async (req, res) => {
     const { page, limit } = getPaginationParams(req);
 
     try {
-      const result = await userService.getData(page, limit);
+      const result = await userRoleService.getData(page, limit);
       handleSuccess(res, req, 200, {
         data: result.data,
         pagination: {
@@ -27,30 +27,30 @@ const getData = async (req, res) => {
 const insertData = async (req, res) => {
   if (!checkPermission(req, res, 'c')) return;
 
-  const { username, firstName, lastName, email, phoneNumber, roleId } = req.body;
+  const { userId, roleId } = req.body;
   const createdBy = req.user?.id;
 
   try {
-    await userService.insertData({ username, firstName, lastName, email, phoneNumber, roleId, createdBy });
+    await userRoleService.insertData({ userId, roleId, createdBy });
     handleSuccess(res, req, 200, "data created successfully");
   } catch (error) {
     handleError(res, req, error);
   }
-}
+};
 
 const updateData = async (req, res) => {
   if (!checkPermission(req, res, 'u')) return;
   const id = parseInt(req.params.id);
-  const { password, firstName, lastName, email, phoneNumber, roleId } = req.body;
+  const { userId, roleId } = req.body;
   const updatedBy = req.user?.id;
 
   try {
-    await userService.updateData({ id, password, firstName, lastName, email, phoneNumber, roleId, updatedBy });
+    await userRoleService.updateData({ id, userId, roleId, updatedBy });
     handleSuccess(res, req, 200, "data updated successfully");
   } catch (error) {
     handleError(res, req, error);
   }
-}
+};
 
 const deleteData = async (req, res) => {
   if (!checkPermission(req, res, 'd')) return;
@@ -59,11 +59,11 @@ const deleteData = async (req, res) => {
   const deletedBy = req.user?.id;
 
   try {
-    await userService.deleteData({ id, deletedAt, deletedBy });
+    await userRoleService.deleteData({ id, deletedAt, deletedBy });
     handleSuccess(res, req, 200, "data deleted successfully");
   } catch (error) {
     handleError(res, req, error);
   }
-}
+};
 
 module.exports = { getData, insertData, updateData, deleteData };

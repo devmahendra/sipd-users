@@ -1,5 +1,6 @@
 const mapHttpCode = require('../helpers/mapHttpCode'); 
 const responseDefault = require('../utils/responseDefault'); 
+const { logData } = require('../utils/loggers');
 
 /**
  * Custom error class with HTTP status support.
@@ -21,7 +22,16 @@ class HttpError extends Error {
 const handleError = (res, req, error) => {
   const httpCode = error.httpCode || 500;
   const responseType = mapHttpCode(httpCode);
+  
+  logData({
+    level: 'error',
+    proccessName: req.routeConfig?.name || 'Unknown Process',
+    data: `Error: ${error.message}, Stack: ${error.stack}`,
+    httpCode: httpCode,
+  });
+  
   res.status(httpCode).json(responseDefault(responseType, error.message, req));
 };
+
 
 module.exports = { handleError, HttpError };

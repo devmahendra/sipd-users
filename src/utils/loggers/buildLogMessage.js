@@ -8,7 +8,7 @@ function buildLogMessage(context) {
   if (context.device) parts.push(`device:${context.device}`);
   if (context.ip) parts.push(`ip:${context.ip}`);
   if (context.method || context.path) {
-    parts.push(`path:${context.method || ''} ${context.path || ''}`.trim());
+    parts.push(`path:${context.method || ''} ${context.path || ''}`);
   }
   if (context.httpCode !== undefined) parts.push(`httpCode:${context.httpCode}`);
   if (context.data) parts.push(`data:${JSON.stringify(context.data)}`);

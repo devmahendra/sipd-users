@@ -1,6 +1,5 @@
 const { transports, format } = require('winston');
 const net = require('net');
-const { Writable } = require('stream');
 const { combine, timestamp, json } = format;
 
 class LogstashTCPTransport extends transports.Stream {
@@ -16,6 +15,7 @@ class LogstashTCPTransport extends transports.Stream {
 
     const connectSocket = () => {
       socket.connect(port, host, () => {
+        socket.setKeepAlive(true);
         log({
           level: 'info',
           proccessName,

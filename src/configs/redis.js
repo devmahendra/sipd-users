@@ -44,7 +44,7 @@ redisClient.on('reconnecting', () => {
 
 redisClient.on('connect', () => {
   logData({
-    level: 'warn',
+    level: 'info',
     proccessName: proccessName,
     data: 'Redis attempting connection...',
   });

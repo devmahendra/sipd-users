@@ -1,5 +1,7 @@
 const pool = require('../configs/db');
+const buildChangesObject = require('../helpers/changesObject');
 const userRepository = require('../repositories/userRepository');
+const approvalService = require('./approvalService');
 const { randomPassword, hashedPassword } = require('../helpers/password');
 const { handlePostgresError } = require('../utils/errorDbHandler');
 
@@ -31,6 +33,17 @@ const insertData = async (data) => {
 
         if (roleId) {
             await userRepository.insertUserRole(pool, { userId: result.id, roleId: roleId });
+        }
+
+        if(result) {
+            const changes = buildChangesObject({}, { ...data, password: hashedPass });
+            await approvalService.insertApproval(pool, {
+                entityType: 'users',
+                entityId: result.id,
+                changes,
+                actionType: 'create',
+                requestedBy: data.createdBy,
+            });
         }
         
         await pool.query('COMMIT');

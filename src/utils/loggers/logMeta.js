@@ -6,6 +6,9 @@ function logMeta(httpCode, level, signal) {
     if (httpCode === 500) {
       resolvedLevel = 'error';
       resolvedSignal = 'E';
+    } else if (httpCode !== 200) {
+      resolvedLevel = 'warn';
+      resolvedSignal = 'N';
     } else {
       resolvedLevel = 'info';
       resolvedSignal = 'N';
@@ -22,7 +25,7 @@ function logMeta(httpCode, level, signal) {
     } else {
       resolvedSignal = 'N';
     }
-  }
+  } 
   return { level: resolvedLevel, signal: resolvedSignal };
 }
 

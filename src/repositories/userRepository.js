@@ -177,6 +177,17 @@ const updateUserRole = async (client, { userId, roleId }) => {
   return result.rows[0];
 };
 
+const updateUserStatus = async (client, userId, status, approvedBy) => {
+  const query = `
+    UPDATE users
+    SET status = $1, updated_by = $2, updated_at = CURRENT_TIMESTAMP
+    WHERE id = $3
+  `;
+  const values = [status, approvedBy, userId];
+  await client.query(query, values);
+};
+
+
 const deleteData = async ({ id, deletedAt, deletedBy }) => {
   const client = await pool.connect();
   
@@ -215,5 +226,6 @@ module.exports = {
   updateUser,
   updateUserProfile,
   updateUserRole,
+  updateUserStatus,
   deleteData 
 };

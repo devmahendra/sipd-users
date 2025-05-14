@@ -4,6 +4,7 @@ const roleController = require("../controllers/roleController");
 const roleMenuController = require("../controllers/roleMenuController");
 const userRoleController = require("../controllers/userRoleController");
 const menuController = require("../controllers/menuController");
+const approvalController = require("../controllers/approvalController");
 
 module.exports = {
     LOGIN: authController.login,
@@ -27,4 +28,6 @@ module.exports = {
     CREATE_MENU: menuController.insertData,
     UPDATE_MENU: menuController.updateData,
     DELETE_MENU: menuController.deleteData,
+    GET_APPROVAL: approvalController.getData,
+    APPROVAL: approvalController.approveData,
 };

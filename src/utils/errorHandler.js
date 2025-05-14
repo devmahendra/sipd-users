@@ -26,7 +26,7 @@ const handleError = (res, req, error) => {
   logData({
     level: 'error',
     proccessName: req.routeConfig?.name || 'Unknown Process',
-    data: `Error: ${error.message}, Stack: ${error.stack}`,
+    data: `Error: ${error.message}`,
     httpCode: httpCode,
   });
   

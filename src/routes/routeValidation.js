@@ -3,6 +3,7 @@ const roleSchema = require("../schemas/roleSchema");
 const roleMenuSchema = require("../schemas/roleMenuSchema");
 const userRoleSchema = require("../schemas/userRoleSchema");
 const menuSchema = require("../schemas/menuSchema");
+const approvalSchema = require("../schemas/approvalSchema");
 
 module.exports = {
     LOGIN: userSchema.loginSchema,
@@ -26,4 +27,6 @@ module.exports = {
     CREATE_MENU: menuSchema.createDataSchema,
     UPDATE_MENU: menuSchema.updateDataSchema,
     DELETE_MENU: menuSchema.deleteDataSchema,
+    GET_APPROVAL: approvalSchema.getDataSchema,
+    APPROVAL: approvalSchema.approveDataSchema,
 };
